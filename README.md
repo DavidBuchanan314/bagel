@@ -62,7 +62,7 @@ This is semantically identical to as in the `age` spec. The type string used in 
 The serialised Recipient body always has length 64, and is comprised of the following fields:
 
 ```
-ephemeral share - 32 bytes
+ephemeral share    - 32 bytes
 encrypted file key - 32 bytes (16 bytes of ciphertext and 16 bytes of auth tag)
 ```
 
