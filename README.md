@@ -51,7 +51,7 @@ The MAC value is 32 bytes long and follows immediately after the Nonce.
 
 ## Payload
 
-The payload is encoded exactly as in the `age` spec, except for the fact that the Nonce is not present (since it's been moved into the Header).
+The payload is encoded exactly as in the `age` spec, except for the fact that the Nonce is not present (since it's already specified in the Header).
 
 ## Native recipient types
 
