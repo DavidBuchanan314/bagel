@@ -1,4 +1,4 @@
-# bagel
+# bagel [DRAFT]
 
 (Binary [age](https://age-encryption.org/) aLternative)
 
