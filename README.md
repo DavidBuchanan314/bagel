@@ -8,6 +8,8 @@ Actually, that's not true. I'm making a small tweak - the nonce is now part of t
 
 **Currently, I'm not proposing this as a serious alternative to `age`. It's just a toy/prototype, and has not been extensively tested, audited, peer-reviewed, or even implemented yet. Significant changes may be made to this spec before it is considered "final" (if that ever happens at all!)**
 
+If you know (or can calculate) the `file key` for an age file or a bagel file, you can convert one format into the other "losslessly", provided that the recipient types used are specified in both age and bagel formats.
+
 ## Header
 
 ### Version Magic
