@@ -53,9 +53,9 @@ The MAC value is 32 bytes long and follows immediately after the Nonce.
 
 The payload is encoded exactly as in the `age` spec, except for the fact that the Nonce is not present (since it's been moved into the Header).
 
-# Native recipient types
+## Native recipient types
 
-## The X25519 recipient type
+### The X25519 recipient type
 
 This is semantically identical to as in the `age` spec. The type string used in the serialised Recipient structure is "X25519".
 
@@ -68,7 +68,7 @@ encrypted file key - 32 bytes (16 bytes of ciphertext and 16 bytes of auth tag)
 
 These are the same values that would ordinarily be in the `age` text-based header, but as raw bytes instead of base64.
 
-## The scrypt recipient type
+### The scrypt recipient type
 
 This is semantically identical to as in the `age` spec. The type string used in the serialised Recipient structure is "scrypt".
 
