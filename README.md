@@ -2,9 +2,13 @@
 
 (Binary [age](https://age-encryption.org/) aLternative)
 
-I like `age`, but it has a text-based header format. I don't like text-based formats, so I'm specifying a binary alternative, because I think it's easier and less error-prone to parse. The cryptographic properties of the format should be unchanged, it's just a different way of serialising the same information.
+I like `age`, but it has a text-based header format. I don't like text-based formats, so I'm specifying a binary alternative, because I think it's easier and less error-prone to parse. The threat model, semantics, and cryptographic properties of the format should be unchanged, it's just a different way of serialising the same information.
 
-Actually, that's not true. I'm making a small tweak - the nonce is now part of the header, and is included in the header's MAC calculation. This addresses a minor hypothetical weakness presented [here.](https://ethz.ch/content/dam/ethz/special-interest/infk/inst-infsec/appliedcrypto/education/theses/project_MircoStauble.pdf)
+Actually, that's not quite true. I'm making two changes to the core cryptography:
+
+- The nonce is now part of the header, and is included in the header's MAC calculation. This addresses a minor hypothetical weakness presented [here.](https://ethz.ch/content/dam/ethz/special-interest/infk/inst-infsec/appliedcrypto/education/theses/project_MircoStauble.pdf)
+
+- The header is hashed before it is HMAC'd. ([rationale](https://github.com/C2SP/C2SP/issues/28))
 
 **Currently, I'm not proposing this as a serious alternative to `age`. It's just a toy/prototype, and has not been extensively tested, audited, peer-reviewed, or even implemented yet. Significant changes may be made to this spec before it is considered "final" (if that ever happens at all!)**
 
@@ -47,7 +51,14 @@ The recipients are immediately followed by the 16-byte nonce value.
 
 ### Header MAC
 
-The header MAC is calculated as specified as specified in the `age` spec, except the MAC is computed over the entirety of the previous file bytes up to this point, including the Version Magic and the Nonce. Note: The original `age` spec does not include the Nonce as part of the MAC calculation.
+The HMAC key is computed as specified in the `age` spec.
+
+The header MAC is computed using HMAC-SHA-256, over the SHA-256 hash of all previous header bytes (including the Version Magic, and the Nonce). i.e.:
+
+```
+HMAC key = HKDF-SHA-256(ikm = file key, salt = empty, info = "header")
+header MAC = HMAC-SHA-256(HMAC key, SHA-256(header bytes))
+```
 
 The MAC value is 32 bytes long and follows immediately after the Nonce.
 
