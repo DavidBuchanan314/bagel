@@ -339,44 +339,15 @@ class BagelReader:
 			if len(recipient_stanzas) != 1:
 				raise Exception("Scrypt recipient stanza found, but there were other stanzas")
 			
-			scrypt_stanza: ScryptRecipientStanza = recipient_stanzas[0]
 			passphrase = self._scrypt_passphrase_callback()
-
-			wrap_key = Scrypt(
-				salt=b"age-encryption.org/v1/scrypt" + scrypt_stanza.salt,
-				length=32,
-				n=2**scrypt_stanza.log2_work_factor,
-				r=8,
-				p=1,
-			).derive(passphrase)
-
-			file_key = ChaCha20Poly1305(key=wrap_key).decrypt(
-				nonce=bytes(12),
-				data=scrypt_stanza.encrypted_file_key,
-				associated_data=b""
-			)
+			file_key = self._unwrap_scrypt_stanza(recipient_stanzas[0], passphrase)
 		else:
 			# at this point, recipient_stanzas is all X25519
 			for stanza in recipient_stanzas:
 				assert(type(stanza) is X25519RecipientStanza)
-				ephemeral_share = X25519PublicKey.from_public_bytes(stanza.ephemeral_share)
 				for privkey in self._x25519_identities:
-					salt = stanza.ephemeral_share + privkey.public_key().public_bytes_raw()
-					info = b"age-encryption.org/v1/X25519"
-					shared_secret = privkey.exchange(ephemeral_share)
-
-					wrap_key = HKDF_SHA256_32(
-						ikm=shared_secret,
-						salt=salt,
-						info=info
-					)
-
 					try:
-						file_key = ChaCha20Poly1305(key=wrap_key).decrypt(
-							nonce=bytes(12),
-							data=stanza.encrypted_file_key,
-							associated_data=b""
-						)
+						file_key = self._unwrap_x25519_stanza(stanza, privkey)
 						break
 					except:
 						pass
@@ -405,6 +376,43 @@ class BagelReader:
 				associated_data=b""
 			))
 	
+	def _unwrap_x25519_stanza(self, stanza: X25519RecipientStanza, privkey: X25519PrivateKey):
+		salt = stanza.ephemeral_share + privkey.public_key().public_bytes_raw()
+		info = b"age-encryption.org/v1/X25519"
+		shared_secret = privkey.exchange(
+			X25519PublicKey.from_public_bytes(stanza.ephemeral_share)
+		)
+
+		wrap_key = HKDF_SHA256_32(
+			ikm=shared_secret,
+			salt=salt,
+			info=info
+		)
+
+		file_key = ChaCha20Poly1305(key=wrap_key).decrypt(
+			nonce=bytes(12),
+			data=stanza.encrypted_file_key,
+			associated_data=b""
+		)
+
+		return file_key
+
+	def _unwrap_scrypt_stanza(self, stanza: ScryptRecipientStanza, passphrase: bytes):
+		wrap_key = Scrypt(
+			salt=b"age-encryption.org/v1/scrypt" + stanza.salt,
+			length=32,
+			n=2**stanza.log2_work_factor,
+			r=8,
+			p=1,
+		).derive(passphrase)
+
+		file_key = ChaCha20Poly1305(key=wrap_key).decrypt(
+			nonce=bytes(12),
+			data=stanza.encrypted_file_key,
+			associated_data=b""
+		)
+
+		return file_key
 
 	def _enumerate_chunks(self, stream):
 		"""
