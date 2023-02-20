@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 import secrets
+import sys
 from dataclasses import dataclass
 from typing import List, Dict
 from functools import partial
@@ -311,7 +312,7 @@ class BagelReader:
 			recip = RECIPIENT_TYPE_MAP.get(recipient_type)
 
 			if recip is None:
-				print(f"INFO: unrecognised recipient type {recipient_type}, skipping.")
+				print(f"INFO: unrecognised recipient type {recipient_type}, skipping.", file=sys.stderr)
 				continue
 
 			if len(recipient_body) != recip.SERIALISED_LENGTH:
@@ -507,5 +508,8 @@ if __name__ == "__main__":
 	test_roundtrip(os.urandom(0x10000))
 	test_roundtrip(os.urandom(0x10000 - 1))
 	test_roundtrip(os.urandom(0x10000 + 1))
+	test_roundtrip(os.urandom(0x20000))
+	test_roundtrip(os.urandom(0x20000 - 1))
+	test_roundtrip(os.urandom(0x20000 + 1))
 	test_roundtrip(os.urandom(0x100000 - 1234))
 
