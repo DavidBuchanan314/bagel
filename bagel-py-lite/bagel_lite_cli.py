@@ -44,8 +44,16 @@ def request_passphrase():
 	return getpass("Scrypt passphrase: ").encode()
 
 
+class StderrLoggingArgumentParser(argparse.ArgumentParser):
+	"""Dirty hack to make argparse log to stderr"""
+
+	def _print_message(self, message, file=None):
+		print(message, end="", file=sys.stderr)
+
+
+
 if __name__ == "__main__":
-	argparser = argparse.ArgumentParser(
+	argparser = StderrLoggingArgumentParser(
 		prog="bagel_lite_cli.py",
 		formatter_class=argparse.RawDescriptionHelpFormatter,
 		epilog=HELP_TEXT
