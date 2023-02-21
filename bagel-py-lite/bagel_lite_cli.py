@@ -91,7 +91,7 @@ if __name__ == "__main__":
 	
 	if args.encrypt:
 		if args.output != "-" and output_file.isatty():
-			raise Exception("refusing to output binary to the terminal (hint: force with '-o -')")
+			raise argparser.error("refusing to output binary to the terminal (hint: force with '-o -')")
 		
 		recipients = [r.encode() for r in args.recipient]
 
@@ -116,6 +116,9 @@ if __name__ == "__main__":
 		bagel = BagelWriter(recipients, passphrase)
 		bagel.encrypt(output_file, input_file)
 	else: # decrypt
+		if args.passphrase:
+			argparse.error("-p can't be specified in decrypt mode (if a passphrase is needed, it will be prompted interactively)")
+
 		identities = []
 		for ident_file in args.identity:
 			if ident_file == "-":
